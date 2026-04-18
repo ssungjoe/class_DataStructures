@@ -116,9 +116,11 @@ Algorithm arrayMax(A, n)
 - **Big-Theta ($\Theta$) 표기법**
   - Big-Oh, Big-Omega를 모두 만족한다. 즉, 동일함수이다.
 <br>
+
 - 증가율(실행 시간) 크기 비교 요약시간 복잡도의 크기를 부등호로 표현하면 다음과 같다. <br>
     오른쪽으로 갈수록 프로그램이 느려진다.<br>
 $c < \log n < \log^2 n < n < n \log n < n^2 < n^3 < 2^n$
+
 <br>
 
 ## 6\. 응용 문제: 누적 평균 (Prefix Average) 알고리즘 비교
