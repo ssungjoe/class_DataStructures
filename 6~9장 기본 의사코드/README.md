@@ -482,6 +482,18 @@ Alg height(v)
 
 ```
 
+**이진트리의 높이 확인**
+
+```text
+Alg height(v)
+1. if (isExternal(v))
+       return 0
+   else
+       h <- max(height(leftChild(v)), height(rightChild(v)))
+       return 1 + h
+
+```
+
 **선위순회**
 
 ```text
