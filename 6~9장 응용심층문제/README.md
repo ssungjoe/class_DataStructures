@@ -2,7 +2,7 @@
 
 연습 6-1. 후위수식 변환
 
-- **해설:** 스택을 활용한 알고리즘을 모의실행하면 연산자 우선순위에 따라 괄호 안이 먼저 처리되고, 곱셈/나눗셈이 덧셈/뺄셈보다 먼저 처리되어 결과적으로 `4 3 * 17 3 + 5 6 15 3 / - 1 + * / -` 와 같은 후위 수식이 산출됩니다.
+- **해설:** 스택을 활용한 알고리즘을 모의실행하면 연산자 우선순위에 따라 괄호 안이 먼저 처리되고, 곱셈/나눗셈이 덧셈/뺄셈보다 먼저 처리되어 결과적으로 `4 3 * 17 3 + 5 / 6 15 3 / - 1 + * -` 와 같은 후위 수식이 산출됩니다.
 
 변형 스택 fullStackException (연습 6-2)
 
@@ -167,7 +167,7 @@ Alg fullStackException(i)
 
 ```
 
-큰 정수 덧셈 알고리즘 (심층 6-6)
+큰 정수 연산 (심층 6-6)
 
 ```text
 Alg addBig(A, B, C)
@@ -182,6 +182,60 @@ Alg addBig(A, B, C)
 4. while (!T.isEmpty())
        C.push(T.pop())
 5. return
+
+Alg subBig(A, B, C)
+1. borrow <- 0
+2. T <- empty stack
+3. while (!A.isEmpty())
+       diff <- A.pop() - borrow
+       if (!B.isEmpty())
+           diff <- diff - B.pop()
+       if (diff < 0)
+           diff <- diff + 10
+           borrow <- 1
+       else
+           borrow <- 0
+       T.push(diff)
+4. while (!T.isEmpty())
+       C.push(T.pop())
+5. return
+
+Alg isBigger(A, B)
+1. sA <- 0
+2. sB <- 0
+3. TA <- empty stack
+4. TB <- empty stack
+5. while (!A.isEmpty())
+       TA.push(A.pop())
+       sA <- sA + 1
+6. while (!B.isEmpty())
+       TB.push(B.pop())
+       sB <- sB + 1
+7. isB <- False
+8. decided <- False
+9. if (sA > sB)
+       isB <- True
+       decided <- True
+   elseif (sA < sB)
+       isB <- False
+       decided <- True
+10. while (!TA.isEmpty() & !TB.isEmpty())
+       a <- TA.pop()
+       b <- TB.pop()
+       A.push(a)
+       B.push(b)
+       if (!decided)
+           if (a > b)
+               isB <- True
+               decided <- True
+           elseif (a < b)
+               isB <- False
+               decided <- True
+11. while (!TA.isEmpty())
+       A.push(TA.pop())
+12. while (!TB.isEmpty())
+       B.push(TB.pop())
+13. return isB
 
 ```
 
@@ -273,11 +327,12 @@ Alg dequeue()
 
 ```text
 Alg reverseQueue(Q)
-1. while (!Q.isEmpty())
+1. S <- empty stack
+2. while (!Q.isEmpty())
        S.push(Q.dequeue())
-2. while (!S.isEmpty())
+3. while (!S.isEmpty())
        Q.enqueue(S.pop())
-3. return
+4. return
 
 ```
 
@@ -446,6 +501,13 @@ Alg countExternalNodes(v)
 
 - **8-7 해설:** 4개의 숫자 1, 5, 6, 7과 연산자 3개를 활용해 21을 만들어야 합니다. 수식 `6 / (1 - (5 / 7))` 이 21이 되며, 이를 수식 트리로 그리면 루트가 `/`, 왼쪽 자식이 `6`, 오른쪽 자식이 `-`가 됩니다. 다시 `-`의 왼쪽은 `1`, 오른쪽은 `/`가 되며 가장 하단의 `/` 자식으로 `5`와 `7`이 배치됩니다.
 
+- **8-8 해설** 노드의 깊이/높이/균형치
+  - 깊이(Depth): 해당 노드에서 루트까지 올라가며 거치는 간선의 수입니다. 루트의 깊이는 0입니다.
+  - 높이(Height): 해당 노드에서 가장 깊은 단말 노드(Leaf)까지 내려가는 가장 긴 간선의 수입니다. 단말 노드의 높이는 0입니다.
+  - 균형치(Balance Factor): 해당 노드의 (왼쪽 자식 트리의 높이) - (오른쪽 자식 트리의 높이)의 절댓값입니다. 빈 트리의 높이는 통상 0로 계산합니다.
+
+- **8-9 해설** '유사한 이진트리(Similar Binary Trees)'란 노드에 들어있는 데이터(element)와 상관없이 트리의 뼈대(구조, shape)가 완전히 동일한 트리를 의미합니다. 따라서 구조가 동일한 두 트리 T와 T'를 동일한 순회 방식(예: 선위순회)으로 순회하면, 방문하게 되는 노드의 위치적 순서는 완벽하게 일치합니다. (물론 출력되는 데이터 값은 다를 수 있습니다.)
+
 - **8-10 해설:** 트리를 추적해보면 m과 k가 공통으로 속하는 가장 낮은 조상은 노드 b입니다. 두 노드 간의 거리는 m에서 b까지의 깊이 차이와 k에서 b까지의 깊이 차이의 합으로 구해집니다(경로 간선의 개수 합산).
   - A. 노드 m, k: LCA는 노드 b입니다. (m에서 b까지 거리 3 + k에서 b까지 거리 2 = 총 거리 5)
   - B. 노드 c, h: LCA는 노드 a입니다. (c에서 a까지 거리 1 + h에서 a까지 거리 3 = 총 거리 4)
@@ -495,6 +557,13 @@ Alg copyBinaryTree(v)
 5. return u
 
 ```
+
+상호재귀 순회 (심층 8-7)
+
+- 3개의 상호재귀 함수는 각각 노드를 언제 visit() 하느냐(맨 처음, 중간, 맨 끝)에 따라 기본 순회와 동일한 결과를 냅니다.
+  - alphaOrder(v): 호출 즉시 자신을 방문하고 자식을 탐색하므로 선위 순회(Pre-order)와 완전히 동일합니다.
+  - betaOrder(v): 왼쪽 자식들을 끝까지 파고든 뒤 자신을 방문하므로 중위 순회(In-order)와 동일합니다.
+  - gammaOrder(v): 자식들을 모두 탐색한 후 마지막에 자신을 방문하므로 후위 순회(Post-order)와 동일합니다.
 
 균형치 구하기 (심층 8-8)
 
