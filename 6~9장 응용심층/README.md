@@ -100,6 +100,59 @@ _후위수식 우향 연산자 확장 (심층 6-3_) \*
 
 - **해설:** 배열 P에 `^` 연산자의 우선순위를 가장 높게(예: 3) 추가합니다. `convert` 알고리즘에서는 top의 연산자와 현재 연산자의 우선순위가 같을 때 좌향(LtoR)이면 pop하지만, `isRToL`이 참(우향)이면 pop하지 않고 스택에 push하도록 분기문을 `while (!S.isEmpty() & (P[s] < P[S.top()] | (P[s] = P[S.top()] & !isRToL(s))))` 와 같이 수정합니다. `doOperator`에는 `^` 분기를 추가해 거듭제곱을 수행합니다.
 
+```text
+{우선순위 P: 첨자는 '(' '+' '-' '*' '/' '^' 에 대응}
+P: array[0..5] of integers = (0, 1, 1, 2, 2, 3)
+
+Alg isRToL(o)
+1. return o = '^'                       {^ 만 우결합(right-to-left)}
+
+Alg convert()
+1. S <- empty stack
+2. while (!endOfFile())
+       s <- getSymbol()
+       if (isOperand(s))
+           write(s)
+       elseif (s = '(')
+           S.push(s)
+       elseif (s = ')')
+           while (S.top() != '(')
+               write(S.pop())
+           S.pop()
+       else
+           while (!S.isEmpty() & (P[s] < P[S.top()] | (P[s] = P[S.top()] & !isRToL(s))))
+               write(S.pop())
+           S.push(s)
+3. while (!S.isEmpty())
+       write(S.pop())
+4. return
+
+Alg evaluate()
+1. S <- empty stack
+2. while (!endOfFile())
+       s <- getSymbol()
+       if (isOperand(s))
+           S.push(s)
+       else
+           a <- S.pop()
+           b <- S.pop()
+           S.push(doOperator(s, b, a))
+3. write(S.pop())
+4. return
+
+Alg doOperator(op, x, y)
+1. switch (op)
+       '+': v <- x + y
+       '-': v <- x - y
+       '*': v <- x * y
+       '/': v <- x / y
+       '^': v <- x ^ y
+2. return v
+
+```
+
+- **핵심:** `convert`의 pop 조건만 바뀝니다. 좌결합 연산자는 우선순위가 같을 때 pop(좌결합), `^`는 `isRToL`이 참이라 우선순위가 같으면 pop하지 않고 push → 우결합. `evaluate`는 후위수식을 처리하므로 결합성과 무관하게 기존과 동일하고, `doOperator`에만 `^` 분기를 추가하면 됩니다. (예: `2 ^ 3 ^ 2` → 후위 `2 3 2 ^ ^` → 2^(3^2)=512)
+
 _이중스택 알고리즘 (심층 6-4_) \*
 
 ```text
@@ -402,9 +455,34 @@ Alg pop()
 6. putnode(p)
 7. return e
 
+Alg inject(e)
+1. p <- getnode()
+2. p.elem <- e
+3. p.next <- Ø
+4. p.prev <- r
+5. if (isEmpty())
+       f <- p
+   else
+       r.next <- p
+6. r <- p
+7. return
+
+Alg eject()
+1. if (isEmpty())
+       emptyDequeException()
+2. e <- r.elem
+3. p <- r
+4. r <- r.prev
+5. if (r = Ø)
+       f <- Ø
+   else
+       r.next <- Ø
+6. putnode(p)
+7. return e
+
 ```
 
-_(inject와 eject도 이와 유사한 포인터 조작을 통해 양 끝단에서 처리합니다)_
+_(inject·eject는 push·pop과 front↔rear 대칭이다: 포인터 next↔prev, f↔r를 맞바꾼 형태)_
 
 두 스택 합동큐 알고리즘 (심층 7-3)
 
@@ -535,7 +613,7 @@ Alg countExternalNodes(v)
   - B. 노드 c, h: LCA는 노드 a입니다. (c에서 a까지 거리 1 + h에서 a까지 거리 3 = 총 거리 4)
   - C. 노드 p, b: LCA는 노드 b입니다. (p의 깊이 5, b의 깊이 1 → p에서 b까지 거리 4 + b에서 b까지 거리 0 = 총 거리 4)
 
-경로길이 선형 알고리즘 (심층 8-2, 8-3)
+경로길이 선형 알고리즘 (심층 8-2)
 
 ```text
 Alg pathLength(v, d)
@@ -546,7 +624,30 @@ Alg pathLength(v, d)
 
 ```
 
-_(내부/외부 경로길이도 동일하게 순회하며 `isInternal`, `isExternal` 조건일 때만 d값을 더합니다)_
+내부·외부 경로길이 (심층 8-3)
+
+```text
+Alg iPathLength(v, d)
+1. if (isInternal(v))
+       sum <- d
+   else
+       sum <- 0
+2. for each w in children(v)
+       sum <- sum + iPathLength(w, d + 1)
+3. return sum
+
+Alg ePathLength(v, d)
+1. if (isExternal(v))
+       sum <- d
+   else
+       sum <- 0
+2. for each w in children(v)
+       sum <- sum + ePathLength(w, d + 1)
+3. return sum
+
+```
+
+_(pathLength·iPathLength·ePathLength 모두 깊이 d를 인자로 내려보내며 한 번의 순회로 O(n)에 계산한다. 내부경로길이는 내부노드에서만, 외부경로길이는 외부노드에서만 d를 더한다. 첫 호출은 d=0.)_
 
 \*_일반 트리 최저공통조상과 거리 (심층 8-4_, 8-5\*)
 
